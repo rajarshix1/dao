@@ -13,7 +13,8 @@ export default function Home() {
   const [desc, setDesc] = useState("")
   const [charity, setCharity] = useState(null)
   const [amount, setAmount] = useState(null)
-  
+  const [allProposals, setAllProposals] = useState([])
+ 
   const connectWallet = async () => {
   
     // Asking if metamask is already present or not
@@ -40,27 +41,25 @@ export default function Home() {
 
   const getALL = async () =>{
     Contract.setProvider(window.ethereum)
-    
     var contract = new Contract(contractABI, contractAddress);
     const all = await contract.methods.getProposals().call()
     console.log(all);
+    console.log(all[0].amount);
+    setAllProposals(all)
   }
   const createProposal = async () =>{
     Contract.setProvider(window.ethereum)
-    
     var contract = new Contract(contractABI, contractAddress);
     const create = await contract.methods.createProposal(desc, charity, amount).send({ from: walletAddress })
   }
-  const createStakeHolder = async () =>{
+  const vote = async (id, choice) =>{
     Contract.setProvider(window.ethereum)
-    
     var contract = new Contract(contractABI, contractAddress);
-    const create = await contract.methods.makeStakeholder(walletAddress).send({ from: walletAddress })
+    const vote = await contract.methods.vote(id, choice).send({ from: walletAddress })
   }
+
   useEffect(() => {
     getALL()
-  
-   
   }, [])
   
   // const abc = await contract.methods.DEFAULT_ADMIN_ROLE().call()
@@ -73,7 +72,6 @@ export default function Home() {
   return (
     <div className={styles.container}>
      <h1>{walletAddress}</h1>
-     <button onClick={createStakeHolder}>click</button>
      <button onClick={connectWallet}>Connect Wallet</button><br/>
      <div className="flex p-2 px-4 gap-2 bg-gray-100 rounded-sm">
             <input
@@ -108,6 +106,23 @@ export default function Home() {
           <button className="bg-red-300 p-2 px-4 mt-2 rounded w-full" onClick={()=>createProposal()}>
             Create Proposal
           </button>
+          {allProposals && allProposals.map(e=>
+             ( <div style={{backgroundColor: '#888', color: "black", padding: '10px'}}>
+              <h3>Description: {e.description}</h3>
+              <button onClick={()=>{vote(e.id, true)}}>Vote for</button>
+              <button onClick={()=>{vote(e.id, false)}}>Vote against</button>
+              <h6>ID: {e.id}</h6>
+              <h6>Amount: {e.amount}</h6>
+              <h6>CharityAddress: {e.charityAddress}</h6>
+              <h6>LivePeriod: {new Date(e.livePeriod*1000).toISOString()}</h6>
+              <h6>Paid: {e.paid}</h6>
+              <h6>PaidBy: {e.paidBy}</h6>
+              <h6>Proposer: {e.proposer}</h6>
+              <h6>VotesAgainst: {e.votesAgainst}</h6>
+              <h6>VotesFor: {e.votesFor}</h6>
+              <h6>VotingPassed: {e.votingPassed}</h6>
+             </div>)
+          )}
     </div>
   )
 }
