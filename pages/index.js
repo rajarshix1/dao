@@ -107,7 +107,8 @@ export default function Home() {
             Create Proposal
           </button>
           {allProposals && allProposals.map(e=>
-             ( <div style={{backgroundColor: '#888', color: "black", padding: '10px'}}>
+             ( <div style={{display: "flex", flexDirection: "row",backgroundColor: '#94f', 
+             justifyContent: "center",alignItems: "center", color: "white", padding: '10px'}}>
               <h3>Description: {e.description}</h3>
               <button onClick={()=>{vote(e.id, true)}}>Vote for</button>
               <button onClick={()=>{vote(e.id, false)}}>Vote against</button>

@@ -54,10 +54,29 @@ export default function Home() {
 //     const create = await contract.methods.createProposal(desc, charity, amount).send({ from: walletAddress })
 //   }
   const createStakeHolder = async () =>{
+    Contract.setProvider(window.ethereum)
+    var contract = new Contract(contractABI, contractAddress);
     if(admin){
         const create = await contract.methods.makeStakeholder(addr).send({ from: walletAddress })
     }
   }
+  const createContributor = async () =>{
+    Contract.setProvider(window.ethereum)
+    var contract = new Contract(contractABI, contractAddress);
+    if(admin){
+        const create = await contract.methods.grantRole("0xf4bb84e1768dd286358a736d195a0b228621173f655a73b89bf8b191ed0ba07d",addr).send({ from: walletAddress })
+    }
+  }
+  // const createStakeHolder = async () =>{
+  //   if(admin){
+  //       const create = await contract.methods.makeStakeholder(addr).send({ from: walletAddress })
+  //   }
+  // }
+  // const createStakeHolder = async () =>{
+  //   if(admin){
+  //       const create = await contract.methods.makeStakeholder(addr).send({ from: walletAddress })
+  //   }
+  // }
   useEffect(() => {
     isAdmin()
   }, [walletAddress])
@@ -70,6 +89,7 @@ export default function Home() {
      <button onClick={connectWallet}>Connect Wallet</button><br/>
      <input onChange={(e)=>setAddr(e.target.value)}  ></input>
      <button onClick={createStakeHolder}>Make StakeHolder</button>
+     <button onClick={createContributor}>Make Contributor</button>
     </div>
   )
 }
