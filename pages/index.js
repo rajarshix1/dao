@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
+import { toast } from 'react-toastify';
 import styles from "../styles/Home.module.css";
 import { contractABI } from "../abi";
 import {
@@ -44,25 +45,64 @@ export default function Home() {
   };
 
   const getALL = async () => {
-    Contract.setProvider(window.ethereum);
-    var contract = new Contract(contractABI, contractAddress);
-    const all = await contract.methods.getProposals().call();
-    console.log(all);
-    console.log(all[0].amount);
-    setAllProposals(all);
+    try {
+      Contract.setProvider(window.ethereum);
+      var contract = new Contract(contractABI, contractAddress);
+      const all = await contract.methods.getProposals().call();
+      console.log(all);
+      console.log(all[0].amount);
+      setAllProposals(all);
+    } catch (error) {
+     toast.error('Switch to BSC testnet in metamask then refresh.')
+    }
   };
   const createProposal = async () => {
-    Contract.setProvider(window.ethereum);
-    var contract = new Contract(contractABI, contractAddress);
-    // const create = await contract.methods.createProposal(desc, charity, amount).send({ from: walletAddress })
+   try {
+    if(walletAddress.length>1){
+      Contract.setProvider(window.ethereum);
+      var contract = new Contract(contractABI, contractAddress);
+      const create = await contract.methods.createProposal(desc, charity, amount).send({ from: walletAddress })
+      toast.success('Done')
+    }
+    else{
+      toast.error('Connect Wallet First')
+    }
+   } catch (error) {
+    console.log(error)
+   }
   };
   const vote = async (id, choice) => {
-    Contract.setProvider(window.ethereum);
-    var contract = new Contract(contractABI, contractAddress);
-    const vote = await contract.methods
-      .vote(id, choice)
-      .send({ from: walletAddress });
+   try {
+    if (walletAddress.length>1) {
+      Contract.setProvider(window.ethereum);
+      var contract = new Contract(contractABI, contractAddress);
+      const vote = await contract.methods
+        .vote(id, choice)
+        .estimateGas({from: walletAddress}).then(async (gas)=>{
+          console.log(gas);
+          await contract.methods
+        .vote(id, choice).send({ from: walletAddress })
+        toast.success('Done')
+        })
+        .catch(error=>{
+          if(error.code){
+            console.log(error);
+            toast.error(error.message)
+          }
+          else{
+            toast.error(JSON.parse(error.message.slice(25)).message)
+          }
+        })
+     }
+     else{
+      toast.error("Connect wallet first")
+     }
+   } catch (error) {
+    console.log(error);
+   }
+      // .send({ from: walletAddress });
   };
+
 
   useEffect(() => {
     getALL();
